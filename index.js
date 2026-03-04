@@ -5,14 +5,16 @@ const cors = require("cors");
 const axios = require("axios");
 const crypto = require("crypto");
 const connectDB = require('./config/db')
+const cookieParser = require("cookie-parser");
+
 const app = express();
 const Githubrouter = require('./routes/OauthRoutes')
-const gitApirouter=require('./routes/githubapi')
+const{ gitApirouter}=require('./routes/githubapi')
 
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: 'http://localhost:5173',
     credentials: true,
   })
 );
@@ -22,7 +24,7 @@ app.use(
   express.raw({ type: "application/json" }),
   require("./routes/webhook")
 );
-
+app.use(cookieParser()); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

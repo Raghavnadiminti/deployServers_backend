@@ -5,11 +5,11 @@ const crypto = require("crypto");
 const Project = require("../models/project");
 const auth = require("../middlewares/auth");
 
-const router = express.Router();
+const gitApirouter = express.Router();
 
 
 
-router.get("/repos", auth, async (req, res) => {
+gitApirouter.get("/repos", auth, async (req, res) => {
   try {
     const response = await axios.get(
       "https://api.github.com/user/repos",
@@ -38,7 +38,7 @@ router.get("/repos", auth, async (req, res) => {
 
 
 
-router.post("/projects", auth, async (req, res) => {
+gitApirouter.post("/projects", auth, async (req, res) => {
   try {
     const { repoFullName } = req.body;
 
@@ -106,4 +106,4 @@ router.post("/projects", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports ={ gitApirouter};
