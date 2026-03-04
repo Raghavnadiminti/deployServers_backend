@@ -81,7 +81,7 @@ Githubrouter.get("/callback", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // res.redirect("http://localhost:5173/dashboard");
+    res.redirect("http://localhost:5173/dashboard");
 
   } catch (error) {
     console.error("OAuth Error:", error.response?.data || error.message);
