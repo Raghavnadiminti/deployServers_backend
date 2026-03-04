@@ -4,9 +4,9 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const crypto = require("crypto");
-
+const connectDB = require('./config/db')
 const app = express();
-
+const Githubrouter = require('./routes/OauthRoutes')
 
 
 app.use(
@@ -25,71 +25,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
+connectDB()
 app.get("/", (req, res) => {
   res.status(200).json({
-    status: "Server running 🚀",
+    status: "Server running ",
   });
 });
 
 
 
-app.get("/auth/github", (req, res) => {
-  const redirectUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo`;
-
-  res.redirect(redirectUrl);
-});
-
-
-
-app.get("/auth/github/callback", async (req, res) => {
-  try {
-    const { code } = req.query;
-
-    if (!code) {
-      return res.status(400).json({ error: "No code provided" });
-    }
-
-    // Exchange code for access token
-    const response = await axios.post(
-      "https://github.com/login/oauth/access_token",
-      {
-        client_id: process.env.GITHUB_CLIENT_ID,
-        client_secret: process.env.GITHUB_CLIENT_SECRET,
-        code,
-      },
-      {
-        headers: { Accept: "application/json" },
-      }
-    );
-
-    const accessToken = response.data.access_token;
-
-    if (!accessToken) {
-      return res.status(400).json({ error: "Failed to get access token" });
-    }
-
-  
-    const userData = await axios.get("https://api.github.com/user", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-
-
-    res.status(200).json({
-      message: "GitHub connected successfully",
-      user: userData.data.login,
-    });
-
-  } catch (error) {
-    console.error("OAuth Error:", error.response?.data || error.message);
-    res.status(500).json({ error: "OAuth failed" });
-  }
-});
-
-
+app.use('/auth/github',Githubrouter)
 
 app.post("/webhook/github", (req, res) => {
   try {
@@ -100,7 +45,7 @@ app.post("/webhook/github", (req, res) => {
       return res.status(400).send("No signature");
     }
 
-    // Verify signature
+  
     const hmac = crypto.createHmac(
       "sha256",
       process.env.GITHUB_WEBHOOK_SECRET
@@ -114,7 +59,7 @@ app.post("/webhook/github", (req, res) => {
       return res.status(401).send("Invalid signature");
     }
 
-    // Parse payload
+  
     const payload = JSON.parse(req.body.toString());
 
     console.log("GitHub Event:", event);
@@ -125,7 +70,7 @@ app.post("/webhook/github", (req, res) => {
 
     }
 
-    res.status(200).send("Webhook received ✅");
+    res.status(200).send("Webhook received");
 
   } catch (err) {
     console.error("Webhook error:", err.message);
