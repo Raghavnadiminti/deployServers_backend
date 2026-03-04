@@ -48,7 +48,18 @@ gitApirouter.post("/projects", auth, async (req, res) => {
     }
     console.log("repofullname",repoFullName)
     const [owner, repo] = repoFullName.split("/");
+ const repoData = await axios.get(
+      `https://api.github.com/repos/${owner}/${repo}`,
+      {
+        headers: {
+          Authorization: `Bearer ${req.user.accessToken}`,
+          Accept: "application/vnd.github+json",
+        },
+      }
+    );
 
+    console.log("Permissions:", repoData.data.permissions);
+    console.log("Owner:", repoData.data.owner.login);
  const webhookResponse = await axios.post(
   `https://api.github.com/repos/${owner}/${repo}/hooks`,
   {
