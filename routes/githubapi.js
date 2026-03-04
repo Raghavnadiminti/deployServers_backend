@@ -59,7 +59,7 @@ gitApirouter.post("/projects", auth, async (req, res) => {
       url: `${process.env.BASE_URL}/webhook/github`,
       content_type: "json",
       insecure_ssl: "0",
-      secret: webhookSecret,
+      secret: process.env.GITHUB_WEBHOOK_SECRET,
     },
   },
   {
