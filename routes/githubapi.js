@@ -19,15 +19,16 @@ gitApirouter.get("/repos", auth, async (req, res) => {
         },
       }
     );
-
+    
     const repos = response.data.map((repo) => ({
+      
       id: repo.id,
       name: repo.name,
       full_name: repo.full_name,
       private: repo.private,
       default_branch: repo.default_branch,
     }));
-
+      
     res.json(repos);
 
   } catch (err) {
@@ -45,42 +46,30 @@ gitApirouter.post("/projects", auth, async (req, res) => {
     if (!repoFullName) {
       return res.status(400).json({ error: "Repo full name required" });
     }
-
+    console.log("repofullname",repoFullName)
     const [owner, repo] = repoFullName.split("/");
 
-    const repoData = await axios.get(
-      `https://api.github.com/repos/${owner}/${repo}`,
-      {
-        headers: {
-          Authorization: `Bearer ${req.user.accessToken}`,
-        },
-      }
-    );
-
-    const { id, name, full_name, default_branch } = repoData.data;
-
-
-    const webhookSecret = crypto.randomBytes(32).toString("hex");
-
-  
-    const webhookResponse = await axios.post(
-      `https://api.github.com/repos/${owner}/${repo}/hooks`,
-      {
-        name: "web",
-        active: true,
-        events: ["push"],
-        config: {
-          url: `${process.env.BASE_URL}/webhook/github`,
-          content_type: "json",
-          secret: webhookSecret,
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${req.user.accessToken}`,
-        },
-      }
-    );
+ const webhookResponse = await axios.post(
+  `https://api.github.com/repos/${owner}/${repo}/hooks`,
+  {
+    name: "web",
+    active: true,
+    events: ["push"],
+    config: {
+      url: `${process.env.BASE_URL}/webhook/github`,
+      content_type: "json",
+      insecure_ssl: "0",
+      secret: webhookSecret,
+    },
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${req.user.accessToken}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  }
+);
 
     const webhookId = webhookResponse.data.id;
 
