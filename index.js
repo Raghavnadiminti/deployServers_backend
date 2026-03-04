@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const connectDB = require('./config/db')
 const app = express();
 const Githubrouter = require('./routes/OauthRoutes')
+const gitApirouter=require('./routes/githubapi')
 
 
 app.use(
@@ -18,9 +19,9 @@ app.use(
 
 app.use(
   "/webhook/github",
-  express.raw({ type: "application/json" })
+  express.raw({ type: "application/json" }),
+  require("./routes/webhook")
 );
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,50 +36,7 @@ app.get("/", (req, res) => {
 
 
 app.use('/auth/github',Githubrouter)
-
-app.post("/webhook/github", (req, res) => {
-  try {
-    const signature = req.headers["x-hub-signature-256"];
-    const event = req.headers["x-github-event"];
-
-    if (!signature) {
-      return res.status(400).send("No signature");
-    }
-
-  
-    const hmac = crypto.createHmac(
-      "sha256",
-      process.env.GITHUB_WEBHOOK_SECRET
-    );
-
-    const digest =
-      "sha256=" +
-      hmac.update(req.body).digest("hex");
-
-    if (signature !== digest) {
-      return res.status(401).send("Invalid signature");
-    }
-
-  
-    const payload = JSON.parse(req.body.toString());
-
-    console.log("GitHub Event:", event);
-
-    if (event === "push") {
-      console.log("Push detected on repo:", payload.repository.full_name);
-
-
-    }
-
-    res.status(200).send("Webhook received");
-
-  } catch (err) {
-    console.error("Webhook error:", err.message);
-    res.status(500).send("Webhook processing failed");
-  }
-});
-
-
+app.use('/api',gitApirouter)
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
