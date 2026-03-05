@@ -37,8 +37,6 @@ gitApirouter.get("/repos", auth, async (req, res) => {
   }
 });
 
-
-
 gitApirouter.post("/projects", auth, async (req, res) => {
   try {
     const { repoFullName } = req.body;
@@ -46,9 +44,12 @@ gitApirouter.post("/projects", auth, async (req, res) => {
     if (!repoFullName) {
       return res.status(400).json({ error: "Repo full name required" });
     }
-    console.log("repofullname",repoFullName)
+
+    console.log("repofullname", repoFullName);
+
     const [owner, repo] = repoFullName.split("/");
- const repoData = await axios.get(
+
+    const repoData = await axios.get(
       `https://api.github.com/repos/${owner}/${repo}`,
       {
         headers: {
@@ -58,33 +59,43 @@ gitApirouter.post("/projects", auth, async (req, res) => {
       }
     );
 
+    const {
+      id,
+      name,
+      full_name,
+      default_branch,
+      owner: repoOwner,
+    } = repoData.data;
+
     console.log("Permissions:", repoData.data.permissions);
-    console.log("Owner:", repoData.data.owner.login);
- const webhookResponse = await axios.post(
-  `https://api.github.com/repos/${owner}/${repo}/hooks`,
-  {
-    name: "web",
-    active: true,
-    events: ["push"],
-    config: {
-      url: `${process.env.BASE_URL}/webhook/github`,
-      content_type: "json",
-      insecure_ssl: "0",
-      secret: process.env.GITHUB_WEBHOOK_SECRET,
-    },
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${req.user.accessToken}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-  }
-);
+    console.log("Owner:", repoOwner.login);
+
+    const webhookSecret = process.env.GITHUB_WEBHOOK_SECRET;
+
+    const webhookResponse = await axios.post(
+      `https://api.github.com/repos/${owner}/${repo}/hooks`,
+      {
+        name: "web",
+        active: true,
+        events: ["push"],
+        config: {
+          url: `${process.env.BASE_URL}/webhook/github`,
+          content_type: "json",
+          insecure_ssl: "0",
+          secret: webhookSecret,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${req.user.accessToken}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      }
+    );
 
     const webhookId = webhookResponse.data.id;
 
-   
     const project = await Project.create({
       user: req.user._id,
       repoId: id,
@@ -102,8 +113,11 @@ gitApirouter.post("/projects", auth, async (req, res) => {
 
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "Project creation failed" });
+
+    res.status(500).json({
+      error: "Project creation failed",
+      details: err.response?.data || err.message,
+    });
   }
 });
-
 module.exports ={ gitApirouter};
