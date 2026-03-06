@@ -120,4 +120,22 @@ gitApirouter.post("/projects", auth, async (req, res) => {
     });
   }
 });
+
+gitApirouter.get("/projects", auth, async (req, res) => {
+  try {
+    const projects = await Project.find({ user: req.user._id })
+      .select("repoName repoFullName defaultBranch repoId createdAt");
+
+    res.json({
+      count: projects.length,
+      projects,
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      error: "Failed to fetch projects",
+    });
+  }
+});
 module.exports ={ gitApirouter};
