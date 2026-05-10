@@ -111,7 +111,7 @@ gitApirouter.post("/projects", auth, async (req, res) => {
       branch: default_branch,
       token: req.user.accessToken,
     }); 
-    console.log("sent request to worker",r.response)
+    console.log("sent request to worker",r)
     res.status(201).json({
       message: "Project created & webhook installed",
       project,
