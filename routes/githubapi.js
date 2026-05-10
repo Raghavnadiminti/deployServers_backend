@@ -105,7 +105,7 @@ gitApirouter.post("/projects", auth, async (req, res) => {
       webhookId,
       webhookSecret,
     });
-      await axios.post("http://172.31.43.239:3000/clone", {
+      await axios.post("http://107.22.96.17:3000/clone", {
       user: req.user._id,
       repoFullName: full_name,
       branch: default_branch,
