@@ -53,7 +53,7 @@ router.post("/", async (req, res) => {
       console.log("Repo:", repoFullName);
       console.log("Branch:", branch);
       console.log("Commit:", commit);
-
+      
       project.lastDeployedCommit = commit;
       await project.save();
        
