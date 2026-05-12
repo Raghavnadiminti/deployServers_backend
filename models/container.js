@@ -10,7 +10,7 @@ const containerSchema = new mongoose.Schema(
 
     containerId: {
       type: String,
-      required: true,
+  
       unique: true,
       sparse:true
     },
