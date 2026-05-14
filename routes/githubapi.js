@@ -12,7 +12,7 @@ const gitApirouter = express.Router();
 gitApirouter.get("/repos", auth, async (req, res) => {
   try {
     const response = await axios.get(
-      "https://api.github.com/user/repos",
+      "https://api.github.com/user/repos?per_page=100&page=1",
       {
         headers: {
           Authorization: `Bearer ${req.user.accessToken}`,
