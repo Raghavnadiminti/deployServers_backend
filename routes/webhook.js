@@ -19,7 +19,9 @@ router.post("/", async (req, res) => {
     const repoFullName = payload.repository.full_name;
 
  
-    const project = await Project.findOne({ repoFullName });
+   const project = await Project.findOne({
+   repoFullName
+}).populate("user");
 
     if (!project) {
       return res.status(404).send("Project not found");
@@ -42,19 +44,28 @@ router.post("/", async (req, res) => {
       return res.status(401).send("Invalid signature");
     }
 
-    console.log("📦 GitHub Event:", event);
+    console.log("GitHub Event:", event);
 
     
     if (event === "push") {
       const branch = payload.ref.split("/").pop();
       const commit = payload.after;
-
+const r = await axios.post(
+  "http://100.30.221.104:3000/clone",
+  {
+    user: project.user._id,
+    repoFullName,
+    branch,
+    token: project.user.accessToken
+  }
+);
       console.log("Deploy Triggered");
       console.log("Repo:", repoFullName);
       console.log("Branch:", branch);
       console.log("Commit:", commit);
       
       project.lastDeployedCommit = commit;
+      project.status='starting' 
       await project.save();
        
     }
