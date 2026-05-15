@@ -47,6 +47,10 @@ const projectSchema = new mongoose.Schema(
       type: String,
       enum: ["running", "stopped", "failed", "starting"],
       default: "starting",
+    },
+    url:{
+      type:String,
+      default:null
     }
     
   },
