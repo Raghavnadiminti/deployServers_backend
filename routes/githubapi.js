@@ -94,7 +94,34 @@ gitApirouter.post("/projects", auth, async (req, res) => {
       }
     );
 
+
+
+
+
     const webhookId = webhookResponse.data.id;
+
+let status = "failed";
+
+try {
+  const r = await axios.post(
+    "http://54.162.149.193:3000/clone",
+    {
+      user: req.user._id,
+      repoFullName: full_name,
+      branch: default_branch,
+      token: req.user.accessToken,
+    }
+  );
+
+  if (r.status === 200) {
+    status = "starting";
+  }
+
+} catch (err) {
+  status = "failed";
+}
+
+
 
     const project = await Project.create({
       user: req.user._id,
@@ -102,6 +129,7 @@ gitApirouter.post("/projects", auth, async (req, res) => {
       repoName: name,
       repoFullName: full_name,
       defaultBranch: default_branch,
+      status:status,
       webhookId,
       webhookSecret,
     });

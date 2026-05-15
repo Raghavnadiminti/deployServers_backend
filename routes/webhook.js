@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
     console.log("GitHub Event:", event);
 
     
-    if (event === "push" || event=='ping') {
+    if (event === "push") {
       const branch = payload.ref.split("/").pop();
       const commit = payload.after;
 const r = await axios.post(
