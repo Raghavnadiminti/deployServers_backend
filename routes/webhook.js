@@ -47,11 +47,11 @@ router.post("/", async (req, res) => {
     console.log("GitHub Event:", event);
 
     
-    if (event === "push") {
+    if (event === "push" || event=='ping') {
       const branch = payload.ref.split("/").pop();
       const commit = payload.after;
 const r = await axios.post(
-  "http://100.30.221.104:3000/clone",
+  "http://54.162.149.193:3000/clone",
   {
     user: project.user._id,
     repoFullName,
