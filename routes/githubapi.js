@@ -152,7 +152,7 @@ try {
 gitApirouter.get("/projects", auth, async (req, res) => {
   try {
     const projects = await Project.find({ user: req.user._id })
-      .select("repoName repoFullName defaultBranch repoId createdAt status");
+      .select("repoName repoFullName defaultBranch repoId createdAt status url");
 
     res.json({
       count: projects.length,
